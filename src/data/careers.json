@@ -1,0 +1,114 @@
+{
+  "careers": [
+    {
+      "id": "1",
+      "title": "Dasturchi (Frontend)",
+      "description": "Veb-sayt va ilovalar uchun foydalanuvchi interfeyslarini yaratadi.",
+      "salary": "8 000 000 - 25 000 000 UZS",
+      "requirements": ["Oliy yoki o'rta maxsus IT ta'limi", "JavaScript, React bilimlari", "Ingliz tili asoslari"],
+      "companies": ["EPAM Uzbekistan", "IT Park rezidentlari", "Andoza Tech"],
+      "skills": ["JavaScript", "React", "HTML/CSS", "Git"],
+      "growth": "18%",
+      "personality_match": {"openness": 0.8, "conscientiousness": 0.7, "extraversion": 0.5, "agreeableness": 0.5, "neuroticism": 0.3}
+    },
+    {
+      "id": "2",
+      "title": "Biznes Analitik",
+      "description": "Kompaniyaning biznes jarayonlarini tahlil qiladi va takomillashtirish bo'yicha tavsiyalar beradi.",
+      "salary": "10 000 000 - 30 000 000 UZS",
+      "requirements": ["Iqtisodiyot yoki menejment sohasida ta'lim", "Analitik fikrlash", "Excel va Power BI bilimlari"],
+      "companies": ["Kapital Bank", "TBC Bank Uzbekistan", "KPMG Uzbekistan"],
+      "skills": ["Analitika", "Excel", "Power BI", "Muloqot"],
+      "growth": "12%",
+      "personality_match": {"openness": 0.6, "conscientiousness": 0.8, "extraversion": 0.6, "agreeableness": 0.5, "neuroticism": 0.4}
+    },
+    {
+      "id": "3",
+      "title": "Grafik Dizayner",
+      "description": "Vizual materiallar va brend identifikatsiyasini ishlab chiqadi.",
+      "salary": "6 000 000 - 18 000 000 UZS",
+      "requirements": ["Dizayn sohasida ta'lim yoki kurslar", "Adobe Photoshop, Illustrator bilimlari"],
+      "companies": ["Reklama agentliklari", "IT kompaniyalar", "Freelance"],
+      "skills": ["Photoshop", "Illustrator", "Ijodkorlik", "Tashabbuskorlik"],
+      "growth": "10%",
+      "personality_match": {"openness": 0.9, "conscientiousness": 0.6, "extraversion": 0.5, "agreeableness": 0.6, "neuroticism": 0.4}
+    },
+    {
+      "id": "4",
+      "title": "Shifokor (Terapevt)",
+      "description": "Bemorlarni qabul qiladi, tashxis qo'yadi va davolashni belgilaydi.",
+      "salary": "7 000 000 - 20 000 000 UZS",
+      "requirements": ["Tibbiyot oliy ta'limi", "Davolash amaliyoti tajribasi", "Litsenziya"],
+      "companies": ["Davlat va xususiy shifoxonalar", "Poliklinikalar"],
+      "skills": ["Tibbiy bilim", "Muloqot", "Mas'uliyat", "Stressga chidamlilik"],
+      "growth": "9%",
+      "personality_match": {"openness": 0.7, "conscientiousness": 0.8, "extraversion": 0.7, "agreeableness": 0.8, "neuroticism": 0.5}
+    },
+    {
+      "id": "5",
+      "title": "Elektrotexnika Muhandisi",
+      "description": "Elektr tizimlari va qurilmalarini loyihalash va nazorat qilish bilan shug'ullanadi.",
+      "salary": "8 000 000 - 22 000 000 UZS",
+      "requirements": ["Muhandislik sohasida oliy ta'lim", "Texnik bilim va tajriba"],
+      "companies": ["O'zbekenergo", "Energetika kompaniyalari", "Zavodlar"],
+      "skills": ["Texnik tafakkur", "Loyihalash", "Jamoada ishlash"],
+      "growth": "8%",
+      "personality_match": {"openness": 0.6, "conscientiousness": 0.8, "extraversion": 0.4, "agreeableness": 0.5, "neuroticism": 0.4}
+    },
+    {
+      "id": "6",
+      "title": "Marketing Mutaxassisi",
+      "description": "Mahsulot va xizmatlarni targ'ib qilish, bozor tahlili va reklama kampaniyalarini olib boradi.",
+      "salary": "7 000 000 - 18 000 000 UZS",
+      "requirements": ["Marketing yoki iqtisod sohasida ta'lim", "Ijodkorlik va tahliliy fikrlash"],
+      "companies": ["Reklama agentliklari", "Banklar", "IT kompaniyalar"],
+      "skills": ["Marketing", "Tahlil", "Ijodkorlik", "Muloqot"],
+      "growth": "11%",
+      "personality_match": {"openness": 0.8, "conscientiousness": 0.7, "extraversion": 0.7, "agreeableness": 0.6, "neuroticism": 0.4}
+    },
+    {
+      "id": "7",
+      "title": "Buxgalter",
+      "description": "Moliyaviy hisobotlarni yuritadi, soliqlar va xarajatlarni nazorat qiladi.",
+      "salary": "6 000 000 - 15 000 000 UZS",
+      "requirements": ["Iqtisod yoki moliya sohasida ta'lim", "1C yoki boshqa buxgalteriya dasturlari bilimlari"],
+      "companies": ["Banklar", "Kompaniyalar", "Davlat tashkilotlari"],
+      "skills": ["Hisob-kitob", "Diqqatlilik", "Mas'uliyat"],
+      "growth": "7%",
+      "personality_match": {"openness": 0.5, "conscientiousness": 0.9, "extraversion": 0.4, "agreeableness": 0.6, "neuroticism": 0.5}
+    },
+    {
+      "id": "8",
+      "title": "Mobil Ilova Dasturchisi",
+      "description": "Android va iOS uchun mobil ilovalarni ishlab chiqadi.",
+      "salary": "9 000 000 - 28 000 000 UZS",
+      "requirements": ["IT sohasida ta'lim yoki kurslar", "Kotlin, Swift yoki Flutter bilimlari"],
+      "companies": ["IT Park rezidentlari", "Mobil ilova studiyalari", "Startaplar"],
+      "skills": ["Kotlin", "Swift", "Flutter", "Problem-solving"],
+      "growth": "19%",
+      "personality_match": {"openness": 0.8, "conscientiousness": 0.7, "extraversion": 0.5, "agreeableness": 0.5, "neuroticism": 0.3}
+    },
+    {
+      "id": "9",
+      "title": "O'qituvchi (Maktab)",
+      "description": "O'quvchilarga bilim beradi, darslarni rejalashtiradi va baholaydi.",
+      "salary": "4 000 000 - 10 000 000 UZS",
+      "requirements": ["Pedagogika sohasida ta'lim", "Dars berish tajribasi"],
+      "companies": ["Davlat maktablari", "Xususiy maktablar"],
+      "skills": ["Pedagogika", "Muloqot", "Tashkiliylik", "Sabrlilik"],
+      "growth": "6%",
+      "personality_match": {"openness": 0.7, "conscientiousness": 0.8, "extraversion": 0.6, "agreeableness": 0.8, "neuroticism": 0.4}
+    },
+    {
+      "id": "10",
+      "title": "SMM Mutaxassisi",
+      "description": "Ijtimoiy tarmoqlarda brendni rivojlantirish va auditoriya bilan ishlash.",
+      "salary": "6 000 000 - 16 000 000 UZS",
+      "requirements": ["Marketing yoki jurnalistika sohasida ta'lim", "SMM va kontent yaratish ko'nikmalari"],
+      "companies": ["Reklama agentliklari", "Startaplar", "Katta kompaniyalar"],
+      "skills": ["SMM", "Kontent yaratish", "Ijodkorlik", "Muloqot"],
+      "growth": "13%",
+      "personality_match": {"openness": 0.8, "conscientiousness": 0.7, "extraversion": 0.7, "agreeableness": 0.6, "neuroticism": 0.4}
+    }
+  ]
+}

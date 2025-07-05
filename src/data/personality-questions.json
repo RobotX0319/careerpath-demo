@@ -1,0 +1,64 @@
+{
+  "questions": [
+    {
+      "id": "1",
+      "text": "Men yangi g'oyalar va tajribalarni qidirishni yaxshi ko'raman.",
+      "category": "openness",
+      "weight": 1
+    },
+    {
+      "id": "2",
+      "text": "Men an'anaviy usullardan chetga chiqishni yoqtirmayman.",
+      "category": "openness",
+      "weight": -1
+    },
+    {
+      "id": "3",
+      "text": "Men har doim vazifalarni o'z vaqtida va tartibli bajaraman.",
+      "category": "conscientiousness",
+      "weight": 1
+    },
+    {
+      "id": "4",
+      "text": "Men ko'pincha ishlarni oxiriga yetkazmasdan qoldiraman.",
+      "category": "conscientiousness",
+      "weight": -1
+    },
+    {
+      "id": "5",
+      "text": "Men odamlar bilan tez va oson muloqot qilaman.",
+      "category": "extraversion",
+      "weight": 1
+    },
+    {
+      "id": "6",
+      "text": "Men ko'proq yolg'iz ishlashni afzal ko'raman.",
+      "category": "extraversion",
+      "weight": -1
+    },
+    {
+      "id": "7",
+      "text": "Men boshqalarga yordam berishga harakat qilaman.",
+      "category": "agreeableness",
+      "weight": 1
+    },
+    {
+      "id": "8",
+      "text": "Men boshqalarning muammolariga befarqman.",
+      "category": "agreeableness",
+      "weight": -1
+    },
+    {
+      "id": "9",
+      "text": "Men stressli vaziyatlarda tez xavotirga tushaman.",
+      "category": "neuroticism",
+      "weight": 1
+    },
+    {
+      "id": "10",
+      "text": "Men muammolar oldida xotirjam bo'la olaman.",
+      "category": "neuroticism",
+      "weight": -1
+    }
+  ]
+}

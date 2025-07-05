@@ -1,0 +1,36 @@
+{
+  "name": "careerpath-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "lint": "next lint",
+    "ip": "node scripts/find-ip.js",
+    "ngrok": "ngrok http 3000"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.1",
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@supabase/supabase-js": "^2.50.3",
+    "@types/uuid": "^10.0.0",
+    "lucide-react": "^0.525.0",
+    "next": "^14.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.4",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.0.4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3"
+  }
+}
