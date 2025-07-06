@@ -1,165 +1,173 @@
 /**
- * TestRunner component for validating Gemini AI responses
- * Used by developers and administrators to ensure response quality
+ * TestRunner component for validating AI responses
  */
 
 import React, { useState } from 'react';
-import { 
-  runAllTests, 
-  testPersonalityAnalysis, 
-  testCareerRecommendations,
-  testChatResponses,
-  testErrorHandling
-} from '../tests/geminiTests';
+import { geminiService } from '@/lib/geminiService';
 
-export default function TestRunner() {
-  const [results, setResults] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedTest, setSelectedTest] = useState('all');
-  
-  async function handleRunTests() {
-    setLoading(true);
-    try {
-      let testResults;
-      
-      switch(selectedTest) {
-        case 'personality':
-          testResults = await testPersonalityAnalysis();
-          break;
-        case 'career':
-          testResults = await testCareerRecommendations();
-          break;
-        case 'chat':
-          testResults = await testChatResponses();
-          break;
-        case 'error':
-          testResults = await testErrorHandling();
-          break;
-        case 'all':
-        default:
-          testResults = await runAllTests();
-          break;
-      }
-      
-      setResults(testResults);
-    } catch (e) {
-      console.error('Test execution error:', e);
-      setResults({ error: 'Test execution failed. See console for details.' });
-    } finally {
-      setLoading(false);
-    }
-  }
-  
-  return (
-    <div className="p-4 border rounded-lg bg-white">
-      <h2 className="text-xl font-bold mb-4">Gemini AI Response Validator</h2>
-      
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">
-          Select test suite to run:
-        </label>
-        <select
-          value={selectedTest}
-          onChange={(e) => setSelectedTest(e.target.value)}
-          className="border rounded px-3 py-2 w-full"
-          disabled={loading}
-        >
-          <option value="all">All Tests</option>
-          <option value="personality">Personality Analysis</option>
-          <option value="career">Career Recommendations</option>
-          <option value="chat">Chat Responses</option>
-          <option value="error">Error Handling</option>
-        </select>
-      </div>
-      
-      <button
-        onClick={handleRunTests}
-        disabled={loading}
-        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
-      >
-        {loading ? 'Running Tests...' : 'Run Tests'}
-      </button>
-      
-      {results && (
-        <div className="mt-6 border-t pt-4">
-          <h3 className="font-bold mb-2">Test Results</h3>
-          
-          {results.error ? (
-            <div className="p-3 bg-red-100 text-red-800 rounded">
-              {results.error}
-            </div>
-          ) : results.overall !== undefined ? (
-            // All tests result
-            <>
-              <div className={`p-3 rounded mb-2 ${results.overall ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                Overall: {results.overall ? 'PASS ✅' : 'FAIL ❌'}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <TestResultCard 
-                  title="Personality Analysis" 
-                  success={results.personality?.success} 
-                  count={results.personality?.results?.length || 0} 
-                />
-                <TestResultCard 
-                  title="Career Recommendations" 
-                  success={results.career?.success} 
-                  count={results.career?.results?.length || 0} 
-                />
-                <TestResultCard 
-                  title="Chat Responses" 
-                  success={results.chat?.success} 
-                  count={results.chat?.results?.length || 0} 
-                />
-                <TestResultCard 
-                  title="Error Handling" 
-                  success={results.errorHandling?.success} 
-                  count={results.errorHandling?.results?.length || 0} 
-                />
-              </div>
-            </>
-          ) : (
-            // Individual test result
-            <div className={`p-3 rounded ${results.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              Test Result: {results.success ? 'PASS ✅' : 'FAIL ❌'}
-              <div className="mt-2">
-                {results.results && (
-                  <div>
-                    <p className="font-medium">Cases tested: {results.results.length}</p>
-                    <p className="font-medium">Success rate: {(results.results.filter((r: any) => r.success).length / results.results.length * 100).toFixed(0)}%</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {/* Detailed logs for developer use */}
-          <div className="mt-4">
-            <details>
-              <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
-                View Detailed Results
-              </summary>
-              <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-60">
-                {JSON.stringify(results, null, 2)}
-              </pre>
-            </details>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+interface TestResult {
+  testName: string;
+  status: 'pass' | 'fail' | 'running';
+  message: string;
+  duration?: number;
 }
 
-function TestResultCard({ title, success, count }: { title: string; success?: boolean; count: number }) {
+export default function TestRunner() {
+  const [isRunning, setIsRunning] = useState(false);
+  const [results, setResults] = useState<TestResult[]>([]);
+
+  const runTests = async () => {
+    setIsRunning(true);
+    setResults([]);
+    
+    const tests: TestResult[] = [
+      { testName: 'AI Connection Test', status: 'running', message: 'Testing connection...' },
+      { testName: 'Personality Analysis Test', status: 'running', message: 'Testing personality analysis...' },
+      { testName: 'Career Recommendations Test', status: 'running', message: 'Testing career recommendations...' },
+      { testName: 'Chat Response Test', status: 'running', message: 'Testing chat responses...' }
+    ];
+    
+    setResults([...tests]);
+    
+    try {
+      // Test 1: AI Connection
+      const startTime = Date.now();
+      const connectionTest = await geminiService.testConnection();
+      const duration1 = Date.now() - startTime;
+      
+      tests[0] = {
+        testName: 'AI Connection Test',
+        status: connectionTest ? 'pass' : 'fail',
+        message: connectionTest ? 'AI connection successful' : 'AI connection failed',
+        duration: duration1
+      };
+      setResults([...tests]);
+
+      // Test 2: Personality Analysis
+      if (connectionTest) {
+        const startTime2 = Date.now();
+        const personalityTest = await geminiService.analyzePersonality({
+          openness: 75,
+          conscientiousness: 80,
+          extraversion: 60,
+          agreeableness: 70,
+          neuroticism: 40
+        });
+        const duration2 = Date.now() - startTime2;
+        
+        tests[1] = {
+          testName: 'Personality Analysis Test',
+          status: personalityTest.length > 50 ? 'pass' : 'fail',
+          message: personalityTest.length > 50 ? 'Personality analysis working' : 'Personality analysis failed',
+          duration: duration2
+        };
+        setResults([...tests]);
+
+        // Test 3: Career Recommendations
+        const startTime3 = Date.now();
+        const careerTest = await geminiService.generateCareerRecommendations({
+          openness: 75,
+          conscientiousness: 80,
+          extraversion: 60,
+          agreeableness: 70,
+          neuroticism: 40
+        }, ['JavaScript', 'Python'], ['Technology', 'Education']);
+        const duration3 = Date.now() - startTime3;
+        
+        tests[2] = {
+          testName: 'Career Recommendations Test',
+          status: careerTest.length > 50 ? 'pass' : 'fail',
+          message: careerTest.length > 50 ? 'Career recommendations working' : 'Career recommendations failed',
+          duration: duration3
+        };
+        setResults([...tests]);
+
+        // Test 4: Chat Response
+        const startTime4 = Date.now();
+        const chatTest = await geminiService.chatWithAI('Dasturlash haqida maslahat bering');
+        const duration4 = Date.now() - startTime4;
+        
+        tests[3] = {
+          testName: 'Chat Response Test',
+          status: chatTest.length > 20 ? 'pass' : 'fail',
+          message: chatTest.length > 20 ? 'Chat responses working' : 'Chat responses failed',
+          duration: duration4
+        };
+        setResults([...tests]);
+      } else {
+        // If connection failed, mark other tests as failed
+        tests[1].status = 'fail';
+        tests[1].message = 'Skipped due to connection failure';
+        tests[2].status = 'fail';
+        tests[2].message = 'Skipped due to connection failure';
+        tests[3].status = 'fail';
+        tests[3].message = 'Skipped due to connection failure';
+        setResults([...tests]);
+      }
+    } catch (error) {
+      console.error('Test error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Mark all running tests as failed
+      const failedTests = tests.map(test => ({
+        ...test,
+        status: test.status === 'running' ? 'fail' as const : test.status,
+        message: test.status === 'running' ? `Failed: ${errorMessage}` : test.message
+      }));
+      setResults(failedTests);
+    }
+    
+    setIsRunning(false);
+  };
+
   return (
-    <div className={`p-3 rounded border ${success ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
-      <h4 className="font-medium">{title}</h4>
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-sm">{count} tests run</span>
-        <span className={`font-bold ${success ? 'text-green-600' : 'text-red-600'}`}>
-          {success ? 'PASS' : 'FAIL'}
-        </span>
+    <div className="p-6 bg-white rounded-lg shadow">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold">AI Response Testing</h2>
+        <button
+          onClick={runTests}
+          disabled={isRunning}
+          className={`px-4 py-2 rounded ${
+            isRunning 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-blue-600 hover:bg-blue-700'
+          } text-white`}
+        >
+          {isRunning ? 'Running Tests...' : 'Run Tests'}
+        </button>
       </div>
+
+      {results.length > 0 && (
+        <div className="space-y-4">
+          {results.map((result, index) => (
+            <div key={index} className="border rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{result.testName}</h3>
+                <div className="flex items-center space-x-2">
+                  {result.duration && (
+                    <span className="text-sm text-gray-500">{result.duration}ms</span>
+                  )}
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    result.status === 'pass' ? 'bg-green-100 text-green-800' :
+                    result.status === 'fail' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {result.status === 'pass' ? '✅ PASS' :
+                     result.status === 'fail' ? '❌ FAIL' : '⏳ RUNNING'}
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">{result.message}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {results.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          Click "Run Tests" to validate AI response quality and functionality.
+        </div>
+      )}
     </div>
   );
 }

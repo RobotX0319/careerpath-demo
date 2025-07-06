@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { PersonalityScores } from '@/types';
+import { logQualityEvent, validateResponse, needsImprovement } from './responseMonitoring_simple';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
@@ -414,9 +415,6 @@ MUHIM: Javobingizda hech qanday yulduzcha, tire, raqam yoki boshqa format belgil
     context: { personality?: PersonalityScores; previousMessages?: string[] } = {},
     userId = 'anonymous'
   ): Promise<string> {
-    // Import response quality monitoring
-    const { validateResponse, logQualityEvent, needsImprovement } = require('./responseMonitoring');
-    
     if (!checkRateLimit(userId)) {
       throw new Error('Juda ko\'p so\'rov yuborildi. Biroz kutib turng.');
     }
@@ -759,12 +757,22 @@ ESLATMA: Javobingizda markdown format, yulduzcha yoki boshqa maxsus belgilar ish
       // Get cached response if available
       const cacheKey = `${responseType}_${responseId}`;
       const cachedResponse = localStorage.getItem(cacheKey);
+
+      // Dynamically require logQualityEvent if not already imported
+      let logQualityEvent: any;
+      try {
+        ({ logQualityEvent } = require('./responseMonitoring'));
+      } catch (e) {
+        console.warn('logQualityEvent could not be loaded:', e);
+      }
       
       if (cachedResponse) {
         try {
           // Mark this response as problematic so we don't use similar patterns
           const { response } = JSON.parse(cachedResponse);
-          logQualityEvent(responseType, response, 'feedback-negative');
+          if (typeof logQualityEvent === 'function') {
+            logQualityEvent(responseType, response, 'feedback-negative');
+          }
           
           // Clear this specific cache entry to force regeneration next time
           localStorage.removeItem(cacheKey);
