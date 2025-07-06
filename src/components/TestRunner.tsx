@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { geminiService } from '@/lib/geminiService';
+import { runGeminiTests, testConnection } from '@/tests/geminiTests';
 
 interface TestResult {
   testName: string;
@@ -22,9 +22,7 @@ export default function TestRunner() {
     
     const tests: TestResult[] = [
       { testName: 'AI Connection Test', status: 'running', message: 'Testing connection...' },
-      { testName: 'Personality Analysis Test', status: 'running', message: 'Testing personality analysis...' },
-      { testName: 'Career Recommendations Test', status: 'running', message: 'Testing career recommendations...' },
-      { testName: 'Chat Response Test', status: 'running', message: 'Testing chat responses...' }
+      { testName: 'Gemini Test Suite', status: 'running', message: 'Running comprehensive tests...' }
     ];
     
     setResults([...tests]);
@@ -32,7 +30,7 @@ export default function TestRunner() {
     try {
       // Test 1: AI Connection
       const startTime = Date.now();
-      const connectionTest = await geminiService.testConnection();
+      const connectionTest = await testConnection();
       const duration1 = Date.now() - startTime;
       
       tests[0] = {
@@ -43,65 +41,36 @@ export default function TestRunner() {
       };
       setResults([...tests]);
 
-      // Test 2: Personality Analysis
+      // Test 2: Run comprehensive tests
       if (connectionTest) {
         const startTime2 = Date.now();
-        const personalityTest = await geminiService.analyzePersonality({
-          openness: 75,
-          conscientiousness: 80,
-          extraversion: 60,
-          agreeableness: 70,
-          neuroticism: 40
-        });
+        const testResults = await runGeminiTests();
         const duration2 = Date.now() - startTime2;
         
+        const allPassed = testResults.every(test => test.success);
+        const passedCount = testResults.filter(test => test.success).length;
+        
         tests[1] = {
-          testName: 'Personality Analysis Test',
-          status: personalityTest.length > 50 ? 'pass' : 'fail',
-          message: personalityTest.length > 50 ? 'Personality analysis working' : 'Personality analysis failed',
+          testName: 'Gemini Test Suite',
+          status: allPassed ? 'pass' : 'fail',
+          message: `${passedCount}/${testResults.length} tests passed`,
           duration: duration2
         };
-        setResults([...tests]);
-
-        // Test 3: Career Recommendations
-        const startTime3 = Date.now();
-        const careerTest = await geminiService.generateCareerRecommendations({
-          openness: 75,
-          conscientiousness: 80,
-          extraversion: 60,
-          agreeableness: 70,
-          neuroticism: 40
-        }, ['JavaScript', 'Python'], ['Technology', 'Education']);
-        const duration3 = Date.now() - startTime3;
         
-        tests[2] = {
-          testName: 'Career Recommendations Test',
-          status: careerTest.length > 50 ? 'pass' : 'fail',
-          message: careerTest.length > 50 ? 'Career recommendations working' : 'Career recommendations failed',
-          duration: duration3
-        };
-        setResults([...tests]);
-
-        // Test 4: Chat Response
-        const startTime4 = Date.now();
-        const chatTest = await geminiService.chatWithAI('Dasturlash haqida maslahat bering');
-        const duration4 = Date.now() - startTime4;
+        // Add individual test results
+        testResults.forEach((result, index) => {
+          tests.push({
+            testName: result.testCase,
+            status: result.success ? 'pass' : 'fail',
+            message: result.response.length > 100 ? result.response.substring(0, 100) + '...' : result.response
+          });
+        });
         
-        tests[3] = {
-          testName: 'Chat Response Test',
-          status: chatTest.length > 20 ? 'pass' : 'fail',
-          message: chatTest.length > 20 ? 'Chat responses working' : 'Chat responses failed',
-          duration: duration4
-        };
         setResults([...tests]);
       } else {
-        // If connection failed, mark other tests as failed
+        // If connection failed, mark comprehensive tests as failed
         tests[1].status = 'fail';
         tests[1].message = 'Skipped due to connection failure';
-        tests[2].status = 'fail';
-        tests[2].message = 'Skipped due to connection failure';
-        tests[3].status = 'fail';
-        tests[3].message = 'Skipped due to connection failure';
         setResults([...tests]);
       }
     } catch (error) {

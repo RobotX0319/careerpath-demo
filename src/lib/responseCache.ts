@@ -1,117 +1,176 @@
 /**
- * Response caching for Gemini AI
- * 
- * This module provides a simple in-memory caching system for AI responses
- * to reduce API calls and improve performance.
+ * Response caching utilities
+ * Simple caching for AI responses to reduce API calls
  */
 
-// Cache storage with type definitions
 interface CacheEntry {
   response: string;
   timestamp: number;
-  type: 'personality' | 'career' | 'chat';
+  requestType: string;
 }
 
-// Cache structure by type and key
-const responseCache = new Map<string, CacheEntry>();
-
-// Cache expiration times (in milliseconds)
-const CACHE_EXPIRY = {
-  personality: 7 * 24 * 60 * 60 * 1000, // 7 days
-  career: 7 * 24 * 60 * 60 * 1000,      // 7 days
-  chat: 1 * 60 * 60 * 1000              // 1 hour
-};
+// Cache duration in milliseconds (30 minutes)
+const CACHE_DURATION = 30 * 60 * 1000;
 
 /**
  * Generate a cache key from input parameters
  */
-function generateCacheKey(type: string, params: any): string {
-  return `${type}_${JSON.stringify(params)}`;
+function generateCacheKey(type: string, input: any): string {
+  const inputString = typeof input === 'string' ? input : JSON.stringify(input);
+  return `${type}_${btoa(inputString).replace(/[^a-zA-Z0-9]/g, '').substring(0, 50)}`;
 }
 
 /**
  * Get a cached response if available and not expired
  */
-export function getCachedResponse(
-  type: 'personality' | 'career' | 'chat',
-  params: any
-): string | null {
-  const cacheKey = generateCacheKey(type, params);
-  const cached = responseCache.get(cacheKey);
-  
-  if (!cached) {
-    return null;
-  }
-  
-  const now = Date.now();
-  if (now - cached.timestamp > CACHE_EXPIRY[type]) {
-    // Cache expired, remove it
-    responseCache.delete(cacheKey);
-    return null;
-  }
-  
-  return cached.response;
-}
-
-/**
- * Store a response in cache
- */
-export function cacheResponse(
-  type: 'personality' | 'career' | 'chat',
-  params: any,
-  response: string
-): void {
-  const cacheKey = generateCacheKey(type, params);
-  
-  responseCache.set(cacheKey, {
-    response,
-    timestamp: Date.now(),
-    type
-  });
-  
-  // Cleanup old cache entries periodically
-  if (responseCache.size > 100) {
-    cleanupCache();
-  }
-}
-
-/**
- * Clear old cache entries to prevent memory leaks
- */
-function cleanupCache(): void {
-  const now = Date.now();
-  
-  // Delete expired entries
-  for (const [key, entry] of responseCache.entries()) {
-    if (now - entry.timestamp > CACHE_EXPIRY[entry.type]) {
-      responseCache.delete(key);
-    }
-  }
-  
-  // If still too large, remove oldest entries
-  if (responseCache.size > 50) {
-    const entries = Array.from(responseCache.entries());
-    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+export function getCachedResponse(type: string, input: any): string | null {
+  try {
+    const key = generateCacheKey(type, input);
+    const cached = localStorage.getItem(`cache_${key}`);
     
-    // Delete oldest 20 entries
-    for (let i = 0; i < 20 && i < entries.length; i++) {
-      responseCache.delete(entries[i][0]);
+    if (cached) {
+      const entry: CacheEntry = JSON.parse(cached);
+      const now = Date.now();
+      
+      // Check if cache is still valid
+      if (now - entry.timestamp < CACHE_DURATION) {
+        console.log(`Cache hit for ${type}`);
+        return entry.response;
+      } else {
+        // Remove expired cache
+        localStorage.removeItem(`cache_${key}`);
+      }
     }
+  } catch (e) {
+    console.error('Failed to get cached response:', e);
+  }
+  
+  return null;
+}
+
+/**
+ * Cache response
+ */
+export function cacheResponse(type: string, input: any, response: string): void {
+  try {
+    const key = generateCacheKey(type, input);
+    const entry: CacheEntry = {
+      response,
+      timestamp: Date.now(),
+      requestType: type
+    };
+    
+    localStorage.setItem(`cache_${key}`, JSON.stringify(entry));
+    console.log(`Response cached for ${type}`);
+    
+    // Clean old cache entries
+    cleanOldCache();
+  } catch (e) {
+    console.error('Failed to cache response:', e);
   }
 }
 
 /**
- * Clear the entire cache or entries of a specific type
+ * Clean old cache entries
  */
-export function clearCache(type?: 'personality' | 'career' | 'chat'): void {
-  if (!type) {
-    responseCache.clear();
-    return;
-  }
-  
-  for (const [key, entry] of responseCache.entries()) {
-    if (entry.type === type) {
-      responseCache.delete(key);
+function cleanOldCache(): void {
+  try {
+    const now = Date.now();
+    const keysToRemove: string[] = [];
+    
+    // Check all localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('cache_')) {
+        try {
+          const cached = localStorage.getItem(key);
+          if (cached) {
+            const entry: CacheEntry = JSON.parse(cached);
+            if (now - entry.timestamp >= CACHE_DURATION) {
+              keysToRemove.push(key);
+            }
+          }
+        } catch (e) {
+          // If we can't parse it, remove it
+          keysToRemove.push(key);
+        }
+      }
     }
+    
+    // Remove old entries
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    if (keysToRemove.length > 0) {
+      console.log(`Cleaned ${keysToRemove.length} old cache entries`);
+    }
+  } catch (e) {
+    console.error('Failed to clean old cache:', e);
+  }
+}
+
+/**
+ * Clear all cache
+ */
+export function clearCache(): void {
+  try {
+    const keysToRemove: string[] = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('cache_')) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    console.log(`Cleared ${keysToRemove.length} cache entries`);
+  } catch (e) {
+    console.error('Failed to clear cache:', e);
+  }
+}
+
+/**
+ * Get cache statistics
+ */
+export function getCacheStats() {
+  try {
+    let totalEntries = 0;
+    let totalSize = 0;
+    let oldEntries = 0;
+    const now = Date.now();
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('cache_')) {
+        totalEntries++;
+        const cached = localStorage.getItem(key);
+        if (cached) {
+          totalSize += cached.length;
+          try {
+            const entry: CacheEntry = JSON.parse(cached);
+            if (now - entry.timestamp >= CACHE_DURATION) {
+              oldEntries++;
+            }
+          } catch (e) {
+            oldEntries++;
+          }
+        }
+      }
+    }
+    
+    return {
+      totalEntries,
+      totalSize,
+      oldEntries,
+      cacheDuration: CACHE_DURATION
+    };
+  } catch (e) {
+    console.error('Failed to get cache stats:', e);
+    return {
+      totalEntries: 0,
+      totalSize: 0,
+      oldEntries: 0,
+      cacheDuration: CACHE_DURATION
+    };
   }
 }

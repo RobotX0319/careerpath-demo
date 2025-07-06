@@ -188,3 +188,87 @@ export function shouldAdjustTemperature(requestType: string): number | null {
   
   return null;
 }
+
+/**
+ * AI Monitoring utilities
+ * Basic monitoring for AI requests and performance
+ */
+
+interface MonitoringData {
+  requests: number;
+  errors: number;
+  averageResponseTime: number;
+  lastRequest: number;
+}
+
+// Get monitoring data
+export function getMonitoringData(): MonitoringData {
+  try {
+    const data = localStorage.getItem('ai_monitoring_data');
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('Failed to get monitoring data:', e);
+  }
+  
+  return {
+    requests: 0,
+    errors: 0,
+    averageResponseTime: 0,
+    lastRequest: 0
+  };
+}
+
+// Log request
+export function logRequest(duration: number, hasError: boolean = false): void {
+  try {
+    const current = getMonitoringData();
+    
+    const updated = {
+      requests: current.requests + 1,
+      errors: hasError ? current.errors + 1 : current.errors,
+      averageResponseTime: Math.round((current.averageResponseTime * current.requests + duration) / (current.requests + 1)),
+      lastRequest: Date.now()
+    };
+    
+    localStorage.setItem('ai_monitoring_data', JSON.stringify(updated));
+  } catch (e) {
+    console.error('Failed to log request:', e);
+  }
+}
+
+// Get request metrics
+export function getRequestMetrics() {
+  const data = getMonitoringData();
+  
+  if (data.requests === 0) {
+    return {
+      totalRequests: 0,
+      errorRate: 0,
+      successRate: 100,
+      averageResponseTime: 0,
+      lastRequestTime: null
+    };
+  }
+  
+  const errorRate = Math.round((data.errors / data.requests) * 100);
+  const successRate = 100 - errorRate;
+  
+  return {
+    totalRequests: data.requests,
+    errorRate,
+    successRate,
+    averageResponseTime: data.averageResponseTime,
+    lastRequestTime: data.lastRequest ? new Date(data.lastRequest) : null
+  };
+}
+
+// Clear monitoring data
+export function clearMonitoringData(): void {
+  try {
+    localStorage.removeItem('ai_monitoring_data');
+  } catch (e) {
+    console.error('Failed to clear monitoring data:', e);
+  }
+}

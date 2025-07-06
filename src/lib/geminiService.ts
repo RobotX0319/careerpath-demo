@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { PersonalityScores } from '@/types';
-import { logQualityEvent, validateResponse, needsImprovement } from './responseMonitoring_simple';
+import { logQualityEvent, validateResponse, needsImprovement } from './responseMonitoring';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
@@ -556,25 +556,11 @@ ESLATMA: Javobingizda markdown format, yulduzcha yoki boshqa maxsus belgilar ish
   // 5. Test AI connection
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.model) return false;
-      
-      const result = await this.model.generateContent("Test");
-      const response = await result.response;
-      console.log('AI test successful:', !!response.text());
-      return !!response.text();
+      const response = await this.chatWithAI('Test', {}, 'test-user');
+      return response.length > 0;
     } catch (error) {
-      console.error('AI connection test failed:', error);
-      // Agar gemini-1.5-flash ishlamasa, gemini-1.5-pro ga o'tish
-      try {
-        console.log('Trying alternative model: gemini-1.5-pro');
-        this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-        const result = await this.model.generateContent("Test");
-        const response = await result.response;
-        return !!response.text();
-      } catch (fallbackError) {
-        console.error('Both models failed:', fallbackError);
-        return false;
-      }
+      console.error('Connection test failed:', error);
+      return false;
     }
   }
 

@@ -7,6 +7,76 @@
 
 import { geminiService } from './geminiService';
 
+/**
+ * Response validation utilities
+ */
+
+// Clean Gemini response function
+export function cleanGeminiResponse(text: string): string {
+  if (!text) return '';
+  
+  const cleaned = text
+    .replace(/\*/g, '') // Remove asterisks
+    .replace(/#/g, '') // Remove hashes
+    .replace(/_/g, '') // Remove underscores
+    .replace(/\-\s/g, '') // Remove bullet points
+    .replace(/\d+\.\s/g, '') // Remove numbered lists
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/\n\s*\n/g, '\n\n') // Clean paragraph breaks
+    .replace(/\s+/g, ' ') // Remove extra spaces
+    .trim();
+    
+  return cleaned;
+}
+
+// Validate response quality
+export function isQualityResponse(response: string): boolean {
+  if (!response) return false;
+  
+  const issues = [
+    response.includes('*'), // Check for asterisks
+    response.includes('#'), // Check for hashes  
+    response.includes('```'), // Check for code blocks
+    response.length < 50, // Too short
+    response.length > 2000, // Too long
+    response.includes('ERROR'),
+    response.includes('undefined'),
+    response.includes('null')
+  ];
+  
+  return !issues.some(issue => issue);
+}
+
+// Format response for better readability
+export function formatResponse(response: string): string {
+  const cleaned = cleanGeminiResponse(response);
+  
+  // Split into paragraphs and clean them
+  const paragraphs = cleaned
+    .split('\n\n')
+    .map(p => p.trim())
+    .filter(p => p.length > 0);
+  
+  return paragraphs.join('\n\n');
+}
+
+// Generate fallback responses
+export function getFallbackResponse(type: 'personality' | 'career' | 'chat'): string {
+  switch (type) {
+    case 'personality':
+      return 'Sizning shaxsiyat tahlili hozirda tayyorlanmoqda. Iltimos, keyinroq urinib ko\'ring.';
+    
+    case 'career':
+      return 'Karyera tavsiyalari hozirda yuklanmoqda. Iltimos, biroz kuting va qayta urinib ko\'ring.';
+    
+    case 'chat':
+      return 'Kechirasiz, hozirda javob bera olmayman. Iltimos, savolingizni qayta yuboring.';
+    
+    default:
+      return 'Xizmat vaqtincha mavjud emas. Iltimos, keyinroq urinib ko\'ring.';
+  }
+}
+
 // Example personality scores for testing
 const testPersonality = {
   openness: 75,
