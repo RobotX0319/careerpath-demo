@@ -6,7 +6,7 @@ import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import QualityMonitor from '@/components/QualityMonitor';
-import { withAuthProtection } from '@/lib/authUtils';
+import { withAuthProtection } from '@/lib/simpleAuth';
 
 function QualityPage() {
   const router = useRouter();

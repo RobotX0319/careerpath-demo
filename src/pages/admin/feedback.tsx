@@ -7,7 +7,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import FeedbackAnalytics from '@/components/FeedbackAnalytics';
 import DetailedFeedbackView from '@/components/DetailedFeedbackView';
-import { withAuthProtection } from '@/lib/authUtils';
+import { withAuthProtection } from '@/lib/simpleAuth';
 
 function FeedbackPage() {
   const router = useRouter();
