@@ -1,6 +1,6 @@
 /**
  * Simple authentication utilities
- * Uses localStorage for demo purposes
+ * Uses localStorage for demo purposes with SSR safety
  */
 
 import React, { useEffect, useState } from 'react';
@@ -15,7 +15,11 @@ const AUTH_KEY = 'careerpath_admin_auth';
 export function login(username: string, password: string): boolean {
   if (username === 'admin' && password === 'careerpath123') {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_KEY, 'true');
+      try {
+        localStorage.setItem(AUTH_KEY, 'true');
+      } catch (e) {
+        console.error('Failed to save auth state:', e);
+      }
     }
     return true;
   }
@@ -27,7 +31,11 @@ export function login(username: string, password: string): boolean {
  */
 export function logout(): void {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(AUTH_KEY);
+    try {
+      localStorage.removeItem(AUTH_KEY);
+    } catch (e) {
+      console.error('Failed to remove auth state:', e);
+    }
   }
 }
 
@@ -36,7 +44,12 @@ export function logout(): void {
  */
 export function checkAuthenticated(): boolean {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem(AUTH_KEY) === 'true';
+    try {
+      return localStorage.getItem(AUTH_KEY) === 'true';
+    } catch (e) {
+      console.error('Failed to check auth state:', e);
+      return false;
+    }
   }
   return false;
 }
@@ -52,30 +65,38 @@ export function withAuthProtection(WrappedComponent: any) {
 
     useEffect(() => {
       const checkAuth = () => {
-        const authStatus = checkAuthenticated();
-        if (!authStatus) {
-          router.replace('/admin/login');
-        } else {
-          setIsAuthenticated(true);
+        // Only check auth on client side
+        if (typeof window !== 'undefined') {
+          const authStatus = checkAuthenticated();
+          if (!authStatus) {
+            router.replace('/admin/login');
+          } else {
+            setIsAuthenticated(true);
+          }
         }
         setIsLoading(false);
       };
 
-      checkAuth();
+      // Small delay to ensure client-side hydration
+      const timer = setTimeout(checkAuth, 100);
+      return () => clearTimeout(timer);
     }, [router]);
 
+    // Show loading on server and during hydration
     if (isLoading) {
       const loadingStyles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        fontSize: '18px'
+        fontSize: '18px',
+        fontFamily: 'Arial, sans-serif'
       };
 
       return React.createElement('div', { style: loadingStyles }, 'Loading...');
     }
 
+    // Don't render if not authenticated
     if (!isAuthenticated) {
       return null;
     }

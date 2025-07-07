@@ -1,78 +1,60 @@
 /**
- * ChatMessage component
+ * ChatMessage Component
  * 
- * Displays a single message in the chat with optional feedback buttons
+ * Displays individual message bubbles in the chat interface
+ * Features:
+ * - Different styling for user and assistant messages
+ * - Avatar display
+ * - Timestamps
+ * - Optimized layout and styling
  */
 
 import React from 'react';
-import FeedbackButtons from './FeedbackButtons';
-import { recordFeedback } from '@/lib/feedbackService';
+import Avatar from './Avatar';
 
 interface ChatMessageProps {
-  message: {
-    id?: string;
-    role: 'user' | 'assistant';
-    content: string;
-    timestamp?: number;
-  };
-  showFeedback?: boolean;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
 }
 
-export default function ChatMessage({ message, showFeedback = true }: ChatMessageProps) {
-  // Generate message ID if none exists
-  const messageId = message.id || `chat_${message.timestamp || Date.now()}`;
-  
-  // Handle feedback
-  const handleFeedback = (feedback: 'helpful' | 'unhelpful') => {
-    if (message.role === 'assistant') {
-      recordFeedback(messageId, 'chat', feedback);
-    }
+export default function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
+  // Format timestamp (e.g., "14:32")
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
+  const isUser = role === 'user';
+  
   return (
-    <div className={`p-4 rounded-lg my-2 ${
-      message.role === 'user' 
-        ? 'bg-blue-50 ml-8' 
-        : 'bg-white border mr-8'
-    }`}>
-      {/* Message header */}
-      <div className="flex items-center mb-2">
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end max-w-[85%] space-x-2`}>
+        {/* Avatar */}
+        <div className={`flex-shrink-0 ${isUser ? 'ml-2' : 'mr-2'}`}>
+          <Avatar type={isUser ? 'user' : 'ai'} />
+        </div>
+        
+        {/* Message bubble */}
         <div 
-          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            message.role === 'user' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 text-gray-700'
-          }`}
+          className={`
+            px-4 py-3 rounded-lg shadow-sm
+            ${isUser 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none' 
+              : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'}
+          `}
         >
-          {message.role === 'user' ? 'S' : 'AI'}
+          <div className="whitespace-pre-wrap">{content}</div>
+          <div 
+            className={`
+              text-xs mt-1 
+              ${isUser ? 'text-blue-100' : 'text-gray-400'}
+            `}
+          >
+            {formatTime(timestamp)}
+          </div>
         </div>
-        <span className="ml-2 font-medium">
-          {message.role === 'user' ? 'Siz' : 'CareerPath AI'}
-        </span>
-        {message.timestamp && (
-          <span className="ml-auto text-xs text-gray-500">
-            {new Date(message.timestamp).toLocaleTimeString()}
-          </span>
-        )}
       </div>
-      
-      {/* Message content */}
-      <div className="whitespace-pre-wrap pl-10">
-        {message.content.split('\n').map((paragraph, index) => (
-          paragraph.trim() ? <p key={index} className="mb-2">{paragraph}</p> : null
-        ))}
-      </div>
-      
-      {/* Show feedback buttons only for assistant messages */}
-      {showFeedback && message.role === 'assistant' && (
-        <div className="pl-10 mt-2">
-          <FeedbackButtons 
-            responseType="chat"
-            responseId={messageId}
-            onFeedback={handleFeedback}
-          />
-        </div>
-      )}
     </div>
   );
 }

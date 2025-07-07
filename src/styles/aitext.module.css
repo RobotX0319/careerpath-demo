@@ -1,0 +1,69 @@
+/* AI Text Display Styles
+ * Enhances readability of AI-generated text throughout the application
+ */
+
+.aiTextContainer {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #333;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+.aiTextContainer p {
+  margin-bottom: 1.2em;
+  text-align: justify;
+}
+
+.aiTextContainer h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  color: #2563eb;
+}
+
+.aiTextSection {
+  margin-bottom: 1.5em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.aiTextSection:last-child {
+  border-bottom: none;
+}
+
+.sectionHeader {
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #1e40af;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.25em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .aiTextContainer {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  
+  .aiTextContainer h4 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Special styling for specific sections */
+.personalityTrait {
+  font-weight: 500;
+}
+
+.careerTitle {
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.highlight {
+  background-color: rgba(253, 224, 71, 0.3);
+  padding: 0.1em 0.2em;
+  border-radius: 0.2em;
+}

@@ -11,23 +11,11 @@ import { geminiService } from './geminiService';
  * Response validation utilities
  */
 
-// Clean Gemini response function
-export function cleanGeminiResponse(text: string): string {
-  if (!text) return '';
-  
-  const cleaned = text
-    .replace(/\*/g, '') // Remove asterisks
-    .replace(/#/g, '') // Remove hashes
-    .replace(/_/g, '') // Remove underscores
-    .replace(/\-\s/g, '') // Remove bullet points
-    .replace(/\d+\.\s/g, '') // Remove numbered lists
-    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/\n\s*\n/g, '\n\n') // Clean paragraph breaks
-    .replace(/\s+/g, ' ') // Remove extra spaces
-    .trim();
-    
-  return cleaned;
-}
+import { cleanGeminiResponse, formatResponse as formatAIResponse } from './textFormatter';
+
+// Export text formatting functions
+export { cleanGeminiResponse };
+export { formatAIResponse as formatResponse };
 
 // Validate response quality
 export function isQualityResponse(response: string): boolean {

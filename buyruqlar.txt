@@ -1,0 +1,95 @@
+# 🚀 CareerPath Loyihasi - Qolgan Qadamlar
+
+## 🎯 **Bajarilgan qadamlar (1-7)**
+
+1. **Gemini AI integratsiyasi** - AI bilan suhbatlashish imkoniyati
+2. **Chat interfeysi** - zamonaviy va qulay chat interfeysi
+3. **Shaxsiyat testi** - foydalanuvchilarning xarakterini aniqlash
+4. **Karyera tavsiyanoma** - shaxsiyatga mos kasblarni tavsiya qilish
+5. **AICallToAction komponenti** - foydalanuvchilarni AI bilan suhbatlashishga jalb qilish
+6. **Fayl tahlil qilish** - PDF va matn fayllarini AI yordamida tahlil qilish
+7. **Statistika va vizualizatsiya** - ma'lumotlarni chiroyli va ko'rgazmali taqdim etish
+
+## 🎯 **8-qadam: Authentication va User Profile**
+
+- Foydalanuvchilar autentifikatsiyasi (login/signup)
+- Profil sahifasi yaratish
+- Foydalanuvchi ma'lumotlarini saqlash
+- Profil sozlamalari va tahrirlash
+- Shaxsiyat va karyera ma'lumotlarini profilga bog'lash
+
+## 🎯 **9-qadam: Notification va Progress Tracking**
+
+- Bildirishnomalar tizimi
+- Foydalanuvchi progressini kuzatish
+- Tavsiyalar va eslatmalar
+- Progress vizualizatsiyasi
+- Kelajak maqsadlar va rejalashtirish
+
+## 🎯 **10-qadam: Karyera yo'nalishi xaritasi**
+
+- Karyera rivojlanish yo'llari ko'rsatish
+- Interaktiv karyera "yo'l xaritasi"
+- Kasblar haqida batafsil ma'lumotlar
+- O'quv manbalari va kurslar tavsiyasi
+- Tajriba oshirish bo'yicha maslahatlar
+
+## 🎯 **11-qadam: Offline ishlash rejimi**
+
+- PWA (Progressive Web App) funksionalligini qo'shish
+- Ma'lumotlarni keshlashtirish
+- Internetga ulanmasdan ham ishlay olish
+- Sinxronlash mexanizmini yaratish
+- Qurilmalararo ishlash imkoniyati
+
+## 🎯 **12-qadam: Performance Optimization va Testing**
+
+- Code splitting va lazy loading
+- Resurslarni optimallashtirish
+- Web Vitals ko'rsatkichlarini yaxshilash
+- End-to-end testlar yozish
+- Security va accessibility audit
+
+## � **Keyingi qadamlar uchun texnologiyalar**
+
+### 🔐 **Authentication uchun:**
+- NextAuth.js
+- JWT tokenlar
+- Serverless DB (Supabase, Firebase)
+- Secure HTTP-only cookies
+
+### 📊 **Notification va Tracking uchun:**
+- Web Push Notifications
+- LocalStorage/IndexedDB
+- Server-sent events
+- Background sync
+
+### �️ **Karyera xaritasi uchun:**
+- D3.js vizualizatsiya
+- Interactive SVG
+- Drag-and-drop UX
+- Node-based graph system
+
+### 🔄 **Offline mode uchun:**
+- Service Workers
+- IndexedDB
+- Workbox
+- Background sync API
+- Manifest.json
+
+### ⚡ **Performance uchun:**
+- Lighthouse audits
+- Image optimization
+- Bundle analysis
+- Code splitting
+- Memoization
+
+## 🎯 **Implementatsiya muddatlari**
+
+- **8-qadam: Authentication** - 1 hafta
+- **9-qadam: Notification** - 1 hafta
+- **10-qadam: Karyera xaritasi** - 2 hafta
+- **11-qadam: Offline mode** - 1 hafta
+- **12-qadam: Performance** - 1 hafta
+
+**Jami**: ~6 hafta

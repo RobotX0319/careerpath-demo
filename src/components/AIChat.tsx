@@ -1,293 +1,292 @@
+/**
+ * AIChat Component
+ * 
+ * Modern chat interface for CareerPath's AI assistant
+ * Features:
+ * - Full-width chat container with proper layout
+ * - Professional message styling
+ * - Typing indicator animation
+ * - Smooth scrolling to new messages
+ * - Enhanced mobile responsiveness
+ */
+
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import { PaperAirplaneIcon, UserIcon, SparklesIcon } from '@heroicons/react/24/solid';
+import React, { useState, useRef, useEffect } from 'react';
 import { geminiService } from '@/lib/geminiService';
-import { supabaseService } from '@/lib/supabase';
-import type { PersonalityScores, ChatMessage } from '@/types';
+import { formatChatResponse } from '@/lib/textFormatter';
+import type { PersonalityScores } from '@/types';
+import ChatMessage from './ChatMessage';
+import TypingIndicator from './TypingIndicator';
+import Avatar from './Avatar';
+import AIPromptSuggestions from './AIPromptSuggestions';
+import styles from '@/styles/chat.module.css';
+
+// Avatar moved to ChatMessage and TypingIndicator components
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
 
 interface AIChatProps {
-  userId?: string;
-  personalityScores?: PersonalityScores;
+  personalityData?: PersonalityScores;
   className?: string;
 }
 
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  isTyping?: boolean;
-}
-
-export const AIChat: React.FC<AIChatProps> = ({
-  userId = 'demo-user',
-  personalityScores,
-  className = ''
-}) => {
+export default function AIChat({ personalityData, className = '' }: AIChatProps) {
+  const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Auto-scroll to bottom
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Scroll to bottom of messages
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
+  
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping]);
-
-  // Initialize chat session
+  }, [messages]);
+  
+  // Load chat history from localStorage
   useEffect(() => {
-    initializeChat();
-  }, [userId]);
-
-  const initializeChat = async () => {
     try {
-      // Create new chat session
-      const session = await supabaseService.createChatSession(userId, 'Karyera maslahat');
-      if (session) {
-        setSessionId(session.id);
-        // Add welcome message
-        const welcomeMessage: Message = {
-          id: 'welcome',
-          role: 'assistant',
-          content: `Salom! Men sizning shaxsiy karyera maslahatchi AI assistentingizman. Sizga quyidagi mavzularda yordam bera olaman:
-
-🎯 Karyera yo'nalishi tanlash
-💼 Ish qidirish strategiyalari  
-📚 Ta'lim va kurslar bo'yicha maslahat
-🚀 Professional rivojlanish
-💬 Suhbatga tayyorgarlik
-
-Menga savol bering yoki muammongizni bayon qiling!`,
-          timestamp: new Date().toISOString()
-        };
-        setMessages([welcomeMessage]);
+      const savedMessages = localStorage.getItem('chat_history');
+      if (savedMessages) {
+        setMessages(JSON.parse(savedMessages));
+      } else {
+        // First-time welcome message
+        setMessages([
+          {
+            role: 'assistant' as const,
+            content: "Salom! Men CareerPath'ning AI karyera maslahatchisiman. Karyera, ta'lim yoki shaxsiy rivojlanish bo'yicha savollaringiz bo'lsa, bemalol so'rang.",
+            timestamp: Date.now()
+          }
+        ]);
       }
-    } catch (error) {
-      console.error('Error initializing chat:', error);
+    } catch (e) {
+      console.error('Failed to load chat history', e);
     }
-  };
-
-  // Send message
-  const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date().toISOString()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+  }, []);
+  
+  // Save chat history to localStorage when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        // Save only the last 20 messages to avoid localStorage limits
+        const messagesToSave = messages.slice(-20);
+        localStorage.setItem('chat_history', JSON.stringify(messagesToSave));
+      } catch (e) {
+        console.error('Failed to save chat history', e);
+      }
+    }
+  }, [messages]);
+  
+  // Auto-grow textarea as user types
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
+    }
+  }, [input]);
+  
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!input.trim() || isLoading) return;
+    
+    const userMessage = input.trim();
+    setInput('');
+    setError(null);
+    
+    // Update messages with user input
+    const updatedMessages = [
+      ...messages,
+      { role: 'user' as const, content: userMessage, timestamp: Date.now() }
+    ];
+    setMessages(updatedMessages);
+    
+    // Reset input field height
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
+    
     setIsLoading(true);
     setIsTyping(true);
-
+    
     try {
-      // Save user message to database
-      if (sessionId) {
-        await supabaseService.saveChatMessage(sessionId, {
-          role: 'user',
-          content: userMessage.content
-        });
-      }
-
-      // Get AI response
-      const previousMessages = messages.map(m => `${m.role}: ${m.content}`);
-      const aiResponse = await geminiService.chatWithAI(
-        userMessage.content,
-        {
-          personality: personalityScores,
+      // Prepare previous messages context
+      const previousMessages = messages
+        .slice(-6) // Only use last 6 messages for context
+        .map(msg => msg.content);
+      
+      // Call AI service with context
+      const response = await geminiService.chatWithAI(
+        userMessage, 
+        { 
+          personality: personalityData,
           previousMessages
-        },
-        userId
+        }
       );
-
-      // Create AI message
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date().toISOString()
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      // Save AI message to database
-      if (sessionId) {
-        await supabaseService.saveChatMessage(sessionId, {
-          role: 'assistant',
-          content: assistantMessage.content
-        });
-      }
-
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Uzr, xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.',
-        timestamp: new Date().toISOString()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      
+      // Format the response for better readability
+      const formattedResponse = formatChatResponse(response);
+      
+      // Update messages with AI response
+      setMessages([
+        ...updatedMessages,
+        { role: 'assistant' as const, content: formattedResponse, timestamp: Date.now() }
+      ]);
+      
+    } catch (err) {
+      console.error('Chat error:', err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : "Xatolik yuz berdi. Qayta urinib ko'ring."
+      );
     } finally {
       setIsLoading(false);
       setIsTyping(false);
     }
   };
-
-  // Handle Enter key
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  };
+  
+  // Handle key press (Enter to send, Shift+Enter for new line)
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSubmit(e);
     }
   };
-
-  // Typing indicator
-  const TypingIndicator = () => (
-    <div className="flex items-center gap-2 p-4 animate-fade-in">
-      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-        <SparklesIcon className="w-4 h-4 text-white" />
-      </div>
-      <div className="bg-gray-100 rounded-2xl px-4 py-3">
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Message bubble component
-  const MessageBubble = ({ message }: { message: Message }) => {
-    const isUser = message.role === 'user';
-    
-    return (
-      <div className={`flex gap-3 p-4 animate-fade-in ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Avatar */}
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isUser 
-            ? 'bg-blue-500' 
-            : 'bg-gradient-to-r from-purple-500 to-blue-500'
-        }`}>
-          {isUser ? (
-            <UserIcon className="w-4 h-4 text-white" />
-          ) : (
-            <SparklesIcon className="w-4 h-4 text-white" />
-          )}
-        </div>
-
-        {/* Message content */}
-        <div className={`max-w-[80%] ${isUser ? 'text-right' : 'text-left'}`}>
-          <div className={`rounded-2xl px-4 py-3 shadow-sm ${
-            isUser 
-              ? 'bg-blue-500 text-white ml-auto' 
-              : 'bg-white border border-gray-200'
-          }`}>
-            <div className={`text-sm leading-relaxed ${isUser ? 'text-white' : 'text-gray-800'}`}>
-              {message.content.split('\n').map((line, index) => (
-                <React.Fragment key={index}>
-                  {line}
-                  {index < message.content.split('\n').length - 1 && <br />}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-          <div className={`text-xs text-gray-500 mt-1 ${isUser ? 'text-right' : 'text-left'}`}>
-            {new Date(message.timestamp).toLocaleTimeString('uz-UZ', { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
-          </div>
-        </div>
-      </div>
-    );
+  
+  // Clear chat history
+  const clearChat = () => {
+    const confirmed = window.confirm('Haqiqatan ham suhbat tarixini tozalamoqchimisiz?');
+    if (confirmed) {
+      setMessages([
+        {
+          role: 'assistant' as const,
+          content: "Suhbat tarixi tozalandi. Yangi suhbatni boshlashingiz mumkin.",
+          timestamp: Date.now()
+        }
+      ]);
+      localStorage.removeItem('chat_history');
+    }
   };
-
+  
+  // Function removed - moved to ChatMessage component
+  
   return (
-    <div className={`flex flex-col h-full bg-white rounded-xl shadow-lg ${className}`}>
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-xl">
-        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-          <SparklesIcon className="w-5 h-5 text-white" />
+    <div 
+      className={`ai-chat flex flex-col bg-white rounded-lg shadow-lg ${className}`}
+      style={{ height: '500px', maxHeight: '80vh' }}
+      ref={chatContainerRef}
+    >
+      {/* Chat Header */}
+      <div className="chat-header flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-t-lg">
+        <div className="flex items-center space-x-3">
+          <Avatar type="ai" />
+          <div>
+            <h3 className="font-semibold">AI Karyera Maslahatchisi</h3>
+            <p className="text-xs text-blue-100">Professional yordam 24/7</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-gray-800">AI Karyera Maslahatchi</h3>
-          <p className="text-sm text-gray-600">Professional yordam 24/7</p>
-        </div>
-        <div className="ml-auto">
-          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-        </div>
-      </div>
-
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 min-h-0">
-        <div className="max-h-full">
-          {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
-          
-          {isTyping && <TypingIndicator />}
-          
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Input area */}
-      <div className="p-4 border-t border-gray-200 bg-white rounded-b-xl">
-        <div className="flex gap-3">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Savolingizni yozing..."
-            disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
+        <div className="flex space-x-2">
           <button
-            onClick={sendMessage}
-            disabled={!inputValue.trim() || isLoading}
-            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full hover:from-blue-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center"
+            onClick={clearChat}
+            className="p-1 text-blue-100 hover:text-white transition-colors"
+            title="Suhbatni tozalash"
           >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <PaperAirplaneIcon className="w-5 h-5" />
-            )}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
           </button>
         </div>
+      </div>
+      
+      {/* Messages Container */}
+      <div className="messages-container flex-1 overflow-y-auto p-4 space-y-1 bg-gray-50">
+        {messages.map((msg, idx) => (
+          <ChatMessage
+            key={idx}
+            role={msg.role}
+            content={msg.content}
+            timestamp={msg.timestamp}
+          />
+        ))}
         
-        {/* Quick suggestions */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          {[
-            "Qanday kasb tanlash kerak?",
-            "Dasturchi bo'lish uchun nima qilish kerak?",
-            "Karyeramni qanday rivojlantirish mumkin?"
-          ].map((suggestion, index) => (
-            <button
-              key={index}
-              onClick={() => setInputValue(suggestion)}
-              disabled={isLoading}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
+        {/* Typing indicator */}
+        {isTyping && <TypingIndicator className="mt-2" />}
+        
+        {/* Error message */}
+        {error && (
+          <div className="flex justify-center">
+            <div className="px-4 py-2 bg-red-50 text-red-600 rounded-lg border border-red-200 text-sm">
+              {error}
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+      
+      {/* Input Area */}
+      <div className="chat-input-container border-t border-gray-200 p-3 bg-white rounded-b-lg">
+        <form onSubmit={handleSubmit} className="flex space-x-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyPress}
+            placeholder="Xabaringizni yozing..."
+            className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent max-h-20 min-h-[40px]"
+            rows={1}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className={`
+              px-4 py-2 rounded-lg flex-shrink-0 transition-colors
+              ${isLoading || !input.trim() 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white'}
+            `}
+          >
+            {isLoading ? (
+              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
+          </button>
+        </form>
+        <p className="text-xs text-gray-500 mt-1">Enter tugmasini bosib xabar yuboring, Shift+Enter orqali yangi qator qo'shing</p>
+      </div>
+      
+      {/* Prompt Suggestions */}
+      <div className="prompt-suggestions border-t border-gray-200 bg-gray-50 p-3">
+        <AIPromptSuggestions 
+          onSelectPrompt={(prompt) => setInput(prompt)} 
+          className="space-x-2"
+        />
       </div>
     </div>
   );
-};
-
-export default AIChat;
+}

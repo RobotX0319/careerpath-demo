@@ -16,8 +16,11 @@ export default function LoginPage() {
   
   // Check if already authenticated
   useEffect(() => {
-    if (checkAuthenticated()) {
-      router.replace('/admin');
+    // Only check on client side
+    if (typeof window !== 'undefined') {
+      if (checkAuthenticated()) {
+        router.replace('/admin');
+      }
     }
   }, [router]);
   
