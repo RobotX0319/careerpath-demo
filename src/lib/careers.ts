@@ -1,5 +1,36 @@
 import careersData from '../data/careers.json';
-import type { Career, PersonalityScores } from '../types';
+
+// Type definitions
+export type Career = {
+  id: string;
+  title: string;
+  description: string;
+  averageSalary?: string;
+  salary?: string;
+  demandLevel?: 'low' | 'medium' | 'high';
+  requiredSkills?: string[];
+  skills?: string[];
+  growthRate?: string;
+  growth?: string;
+  category?: string;
+  matchScore?: number;
+  companies?: string[];
+  personality_match?: {
+    openness: number;
+    conscientiousness: number;
+    extraversion: number;
+    agreeableness: number;
+    neuroticism: number;
+  };
+};
+
+export type PersonalityScores = {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+};
 
 const careers: Career[] = careersData.careers;
 
@@ -28,6 +59,11 @@ function normalizeScores(scores: PersonalityScores): Record<Trait, number> {
 function calculateMatchScore(user: PersonalityScores, career: Career): number {
   const userNorm = normalizeScores(user);
   const careerNorm = career.personality_match;
+  
+  if (!careerNorm) {
+    // If no personality match data, return default score
+    return 50;
+  }
   // Trait og'irliklari
   const weights: Record<Trait, number> = {
     openness: 1.2,

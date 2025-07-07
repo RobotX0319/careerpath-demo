@@ -9,8 +9,8 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import NavBar from '@/components/NavBar';
-// import CareerPathMap from '@/components/career/CareerPathMap';
-// import PersonalityComparison from '@/components/PersonalityComparison';
+import CareerPathMap from '@/components/career/CareerPathMap';
+import PersonalityComparison from '@/components/PersonalityComparison';
 // import type { ComparisonData } from '@/components/PersonalityComparison';
 
 interface CareerPathDetail {
@@ -301,7 +301,45 @@ export default function CareerPathDetailPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold mb-6">O'rganish yo'li</h2>
-              <CareerPathMap steps={careerPath.steps} currentStep={currentStep} />
+              <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4">Karyera yo'li xaritasi</h3>
+              <div className="space-y-4">
+                {careerPath.steps.map((step, index) => (
+                  <div 
+                    key={index}
+                    className={`flex items-center p-4 rounded-lg border-2 transition-colors ${
+                      index === currentStep 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : index < currentStep 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-200 bg-gray-50'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-4 ${
+                      index === currentStep 
+                        ? 'bg-blue-500' 
+                        : index < currentStep 
+                        ? 'bg-green-500' 
+                        : 'bg-gray-400'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">{step.title}</h4>
+                      <p className="text-gray-600 text-sm">{step.description}</p>
+                      <p className="text-sm text-gray-500 mt-1">Muddat: {step.duration}</p>
+                    </div>
+                    {index < currentStep && (
+                      <div className="text-green-500">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
               
               {/* Step Details */}
               <div className="mt-8 space-y-4">

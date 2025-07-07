@@ -1,5 +1,21 @@
 import React from 'react';
-import type { Career } from '../types';
+
+// Career type definition
+type Career = {
+  id: string;
+  title: string;
+  description: string;
+  averageSalary?: string;
+  salary?: string;
+  demandLevel?: 'low' | 'medium' | 'high';
+  requiredSkills?: string[];
+  skills?: string[];
+  growthRate?: string;
+  growth?: string;
+  category?: string;
+  matchScore?: number;
+  companies?: string[];
+};
 
 interface CareerCardProps {
   career: Career;
@@ -41,16 +57,21 @@ export const CareerCard: React.FC<CareerCardProps> = ({ career, rank, onViewDeta
           <span className="font-semibold">O'sish:</span> {career.growth}
         </div>
         <div className="col-span-2 md:col-span-1">
-          <span className="font-semibold">Kompaniyalar:</span> {career.companies.slice(0,2).join(', ')}
+          <span className="font-semibold">Kompaniyalar:</span> {career.companies?.slice(0,2).join(', ') || 'Ma\'lumot yo\'q'}
         </div>
       </div>
       {/* Skills */}
-      <div className="flex flex-wrap gap-2 mt-2">
-        {career.skills.slice(0, 3).map(skill => (
-          <span key={skill} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs font-medium shadow-sm">
+      <div className="flex flex-wrap gap-2 mb-4">
+        {(career.skills && career.skills.length > 0) ? career.skills.slice(0, 3).map(skill => (
+          <span 
+            key={skill}
+            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+          >
             {skill}
           </span>
-        ))}
+        )) : (
+          <span className="text-gray-500 text-sm">Ko'nikmalar ma'lumoti yo'q</span>
+        )}
       </div>
       {/* Button */}
       <button

@@ -6,180 +6,213 @@
  * Detailed view for specific career positions
  */
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import NavBar from '@/components/NavBar';
-import JobPositionDetail from '@/components/career/JobPositionDetail';
 
-interface JobPosition {
-  id: string;
-  title: string;
-  description: string;
-  requirements: string[];
-  responsibilities: string[];
-  skills: string[];
-  salary: {
-    min: number;
-    max: number;
-    currency: string;
-  };
-  location: string;
-  type: 'remote' | 'office' | 'hybrid';
-  experience: 'junior' | 'mid' | 'senior';
-  company?: string;
-}
-
-// Mock data for different positions
-const mockPositions: Record<string, JobPosition> = {
-  'frontend-developer': {
-    id: 'frontend-developer',
-    title: 'Frontend Developer',
-    description: 'Bizning jamoamizga qo\'shilishni istagan frontend dasturchi qidiryapmiz. Siz foydalanuvchi interfeyslari yaratish va veb-ilovalarning frontend qismini rivojlantirish bilan shug\'ullanasiz.',
-    requirements: [
-      '2+ yil tajriba JavaScript va React da',
-      'HTML, CSS, va responsive design bilimi',
-      'Git version control tizimini bilish',
-      'RESTful API\'lar bilan ishlash tajribasi',
-      'Browser compatibility va performance optimization',
-      'Agile metodologiya bilan ishlash tajribasi'
-    ],
-    responsibilities: [
-      'Foydalanuvchi interfeyslari yaratish va rivojlantirish',
-      'Responsive va mobile-friendly dizaynlar yaratish',
-      'Backend API\'lar bilan integratsiya qilish',
-      'Kod review va quality assurance',
-      'Performance optimization va debugging',
-      'Dizayner va backend dasturchilar bilan hamkorlik'
-    ],
-    skills: ['JavaScript', 'React', 'HTML', 'CSS', 'TypeScript', 'Git', 'Webpack', 'REST API'],
-    salary: { min: 1000, max: 2500, currency: 'USD' },
-    location: 'Toshkent, Uzbekiston',
-    type: 'hybrid',
-    experience: 'mid',
-    company: 'TechCorp Uzbekistan'
-  },
-  'backend-developer': {
-    id: 'backend-developer',
-    title: 'Backend Developer',
-    description: 'Server tomonidagi mantiq va ma\'lumotlar bazasini boshqaruvchi backend dasturchi izlaymiz. API\'lar yaratish va serverlarni boshqarish asosiy vazifalar.',
-    requirements: [
-      '3+ yil tajriba Node.js yoki Python da',
-      'Database design va SQL bilimi',
-      'Cloud platforms (AWS, Azure) tajribasi',
-      'API development va documentation',
-      'Security best practices bilimi',
-      'Docker va containerization tajribasi'
-    ],
-    responsibilities: [
-      'Server-side logic va API\'larni rivojlantirish',
-      'Ma\'lumotlar bazasini loyihalash va boshqarish',
-      'Security va performance optimizatsiya',
-      'Cloud infrastructure bilan ishlash',
-      'Microservices arxitekturasini joriy etish',
-      'Frontend jamoasi bilan API integratsiyasi'
-    ],
-    skills: ['Node.js', 'Python', 'PostgreSQL', 'AWS', 'Docker', 'REST API', 'GraphQL', 'Redis'],
-    salary: { min: 1500, max: 3000, currency: 'USD' },
-    location: 'Toshkent, Uzbekiston',
-    type: 'office',
-    experience: 'senior',
-    company: 'DataSoft Solutions'
-  },
-  'data-scientist': {
-    id: 'data-scientist',
-    title: 'Data Scientist',
-    description: 'Ma\'lumotlarni tahlil qilish va machine learning modellari yaratish bo\'yicha mutaxassis izlaymiz. Big data bilan ishlash va insights olish asosiy vazifalar.',
-    requirements: [
-      'Python va R dasturlash tillari bilimi',
-      'Machine Learning va Deep Learning tajribasi',
-      'Statistics va Mathematics kuchli bilimi',
-      'SQL va NoSQL ma\'lumotlar bazalari',
-      'Data visualization tools (Tableau, Power BI)',
-      'Big Data technologies (Spark, Hadoop) tajribasi'
-    ],
-    responsibilities: [
-      'Ma\'lumotlarni yig\'ish, tozalash va tahlil qilish',
-      'Machine Learning modellari yaratish va train qilish',
-      'Business metrics va KPI\'larni rivojlantirish',
-      'Data visualization va reporting',
-      'A/B testing va statistical analysis',
-      'Business stakeholders bilan ishlash'
-    ],
-    skills: ['Python', 'R', 'SQL', 'Machine Learning', 'TensorFlow', 'Pandas', 'Tableau', 'Spark'],
-    salary: { min: 2000, max: 4000, currency: 'USD' },
-    location: 'Remote',
-    type: 'remote',
-    experience: 'senior',
-    company: 'AI Innovations Ltd'
-  }
-};
-
-export default function CareerPositionPage() {
-  const params = useParams();
+// Dynamic import for the career position content to avoid SSR issues
+const CareerPositionContent = dynamic(() => Promise.resolve(({ params }: { params: { positionId: string } }) => {
   const router = useRouter();
-  const positionId = params?.positionId as string;
-  
-  const [position] = useState<JobPosition | null>(
-    positionId ? mockPositions[positionId] || null : null
-  );
-  
-  // If job position not found, redirect to careers page
-  if (!position) {
-    router.push('/careers');
-    return null;
+  const [position, setPosition] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    
+    // Mock career position data
+    const mockPosition = {
+      id: params.positionId,
+      title: `Karyera Pozitsiyasi ${params.positionId}`,
+      company: 'Tech Company',
+      location: 'Toshkent, O\'zbekiston',
+      salary: '$50,000 - $70,000',
+      type: 'To\'liq vaqt',
+      level: 'O\'rta darajali',
+      description: 'Bu ajoyib karyera imkoniyati bo\'lib, sizning ko\'nikmalaringizni rivojlantirishga yordam beradi.',
+      requirements: [
+        '3+ yil tajriba',
+        'TypeScript/JavaScript bilimi',
+        'React/Next.js tajribasi',
+        'Jamoa bilan ishlash ko\'nikmasi'
+      ],
+      benefits: [
+        'Raqobatbardosh maosh',
+        'Sog\'liqni saqlash sug\'urtasi',
+        'Flexible ish vaqti',
+        'Professional rivojlanish imkoniyatlari'
+      ]
+    };
+
+    // Simulate API call
+    setTimeout(() => {
+      setPosition(mockPosition);
+      setIsLoading(false);
+    }, 1000);
+  }, [params.positionId]);
+
+  const handleApply = () => {
+    if (typeof window !== 'undefined') {
+      // Safe to use window/location here
+      alert('Ariza yuborish funksiyasi tez orada qo\'shiladi!');
+    }
+  };
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: position?.title,
+        text: position?.description,
+        url: window.location.href
+      });
+    } else if (typeof window !== 'undefined') {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link nusxa olindi!');
+    }
+  };
+
+  if (!isMounted || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <NavBar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="bg-gray-300 h-8 w-3/4 mb-4 rounded"></div>
+            <div className="bg-gray-300 h-4 w-1/2 mb-8 rounded"></div>
+            <div className="space-y-4">
+              <div className="bg-gray-300 h-4 w-full rounded"></div>
+              <div className="bg-gray-300 h-4 w-full rounded"></div>
+              <div className="bg-gray-300 h-4 w-3/4 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-  
+
+  if (!position) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <NavBar />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Pozitsiya topilmadi
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Orqaga qaytish
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-gray-500">
-            <li>
-              <a href="/careers" className="hover:text-blue-600">Karyeralar</a>
-            </li>
-            <li>
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
-            </li>
-            <li className="text-gray-900 font-medium">{position.title}</li>
-          </ol>
-        </nav>
-        
-        {/* Position Details */}
-        <JobPositionDetail position={position} />
-        
-        {/* Related Positions */}
-        <div className="mt-12">
-          <h3 className="text-xl font-semibold mb-6">O'xshash lavozimlar</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.values(mockPositions)
-              .filter(pos => pos.id !== position.id)
-              .slice(0, 3)
-              .map((relatedPosition) => (
-                <a
-                  key={relatedPosition.id}
-                  href={`/careers/position/${relatedPosition.id}`}
-                  className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <h4 className="text-lg font-semibold mb-2">{relatedPosition.title}</h4>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {relatedPosition.description}
-                  </p>
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>{relatedPosition.location}</span>
-                    <span className="font-medium text-blue-600">
-                      ${relatedPosition.salary.min}-{relatedPosition.salary.max}
-                    </span>
-                  </div>
-                </a>
-              ))}
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {position.title}
+              </h1>
+              <p className="text-xl text-gray-700 mb-1">{position.company}</p>
+              <p className="text-gray-600">{position.location}</p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={handleShare}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Ulashish
+              </button>
+              <button
+                onClick={handleApply}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Ariza berish
+              </button>
+            </div>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-1">Maosh</h3>
+              <p className="text-gray-700">{position.salary}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-1">Ish turi</h3>
+              <p className="text-gray-700">{position.type}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-1">Daraja</h3>
+              <p className="text-gray-700">{position.level}</p>
+            </div>
+          </div>
+
+          <div className="prose max-w-none">
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              Ish haqida
+            </h2>
+            <p className="text-gray-700 mb-6">{position.description}</p>
+
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              Talablar
+            </h2>
+            <ul className="list-disc list-inside text-gray-700 mb-6">
+              {position.requirements.map((req, index) => (
+                <li key={index}>{req}</li>
+              ))}
+            </ul>
+
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              Imtiyozlar
+            </h2>
+            <ul className="list-disc list-inside text-gray-700">
+              {position.benefits.map((benefit, index) => (
+                <li key={index}>{benefit}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={() => router.back()}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Orqaga qaytish
+          </button>
         </div>
       </div>
     </div>
   );
+}), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gray-50">
+      <NavBar />
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="bg-gray-300 h-8 w-3/4 mb-4 rounded"></div>
+          <div className="bg-gray-300 h-4 w-1/2 mb-8 rounded"></div>
+          <div className="space-y-4">
+            <div className="bg-gray-300 h-4 w-full rounded"></div>
+            <div className="bg-gray-300 h-4 w-full rounded"></div>
+            <div className="bg-gray-300 h-4 w-3/4 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+});
+
+export default function CareerPositionPage({ params }: { params: { positionId: string } }) {
+  return <CareerPositionContent params={params} />;
 }

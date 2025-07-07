@@ -5,11 +5,41 @@
  */
 
 import questionsData from '../data/personality-questions.json';
-import type { Question, PersonalityScores } from '../types';
 
-const questions: Question[] = questionsData.questions.map(q => ({
-  ...q,
-  category: q.category as Question['category'],
+// Type definitions
+export type Question = {
+  id: string;
+  text: string;
+  category: string;
+  trait: string;
+  weight?: number;
+  options?: {
+    text: string;
+    value: number;
+  }[];
+};
+
+export type PersonalityScores = {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  neuroticism: number;
+};
+
+const questions: Question[] = questionsData.questions.map((q: any) => ({
+  category: q.category,
+  trait: q.trait || q.category, // Use trait if available, otherwise use category
+  weight: q.weight || 1,
+  id: q.id,
+  text: q.text,
+  options: q.options || [
+    { text: 'Mutlaqo rozi emasman', value: 1 },
+    { text: 'Rozi emasman', value: 2 },
+    { text: 'Neytral', value: 3 },
+    { text: 'Roziman', value: 4 },
+    { text: 'Mutlaqo roziman', value: 5 }
+  ]
 }));
 
 // Javoblarni (1-5) va weight (-1) ni hisobga olib, har bir trait uchun 0-100% ball hisoblash

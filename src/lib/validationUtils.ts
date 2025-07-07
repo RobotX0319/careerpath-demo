@@ -11,11 +11,15 @@ import { geminiService } from './geminiService';
  * Response validation utilities
  */
 
-import { cleanGeminiResponse, formatResponse as formatAIResponse } from './textFormatter';
+// Local text formatting function
+function formatAIResponse(text: string): string {
+  return text.trim().replace(/\n{3,}/g, '\n\n');
+}
 
-// Export text formatting functions
-export { cleanGeminiResponse };
-export { formatAIResponse as formatResponse };
+// Local clean function
+function cleanGeminiResponse(text: string): string {
+  return text.replace(/\*\*/g, '').replace(/\*/g, '').trim();
+}
 
 // Validate response quality
 export function isQualityResponse(response: string): boolean {

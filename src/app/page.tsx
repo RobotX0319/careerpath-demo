@@ -1,6 +1,27 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import './globals.css';
+
+// Dynamically import NavBar to avoid SSR issues
+const NavBar = dynamic(() => import('@/components/NavBar'), {
+  ssr: false,
+  loading: () => (
+    <nav className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="text-xl font-bold text-blue-600">
+              CareerPath
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  )
+});
 
 export default function HomePage() {
   return (

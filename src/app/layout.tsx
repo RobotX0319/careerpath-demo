@@ -3,10 +3,24 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/SimpleNotificationContext';
-import OfflineManager from '@/components/offline/OfflineManager';
-import OfflineNotification from '@/components/offline/OfflineNotification';
-import OfflineInit from './offline-init';
-import PerformanceMonitor from '@/components/performance/PerformanceMonitor';
+import dynamic from 'next/dynamic';
+
+// Dynamic imports for client-only components
+const OfflineManager = dynamic(() => import('@/components/OfflineManager'), {
+  ssr: false
+});
+
+const OfflineNotification = dynamic(() => import('@/components/offline/OfflineNotification'), {
+  ssr: false
+});
+
+const OfflineInit = dynamic(() => import('./offline-init'), {
+  ssr: false
+});
+
+const PerformanceMonitor = dynamic(() => import('@/components/performance/PerformanceMonitor'), {
+  ssr: false
+});
 
 const inter = Inter({ subsets: ['latin'] });
 

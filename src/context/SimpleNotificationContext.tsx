@@ -20,7 +20,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 export function useNotifications() {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within NotificationProvider');
+    // Return safe default implementation for SSR
+    console.warn('useNotifications used outside of NotificationProvider, returning defaults');
+    return {
+      notifications: [],
+      addNotification: () => {},
+      removeNotification: () => {},
+      clearNotifications: () => {},
+      markAsRead: async () => {},
+      deleteNotification: async () => {},
+      goals: [],
+      progressItems: [],
+      isLoading: false
+    };
   }
   return context;
 }
