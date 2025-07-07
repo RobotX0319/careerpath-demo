@@ -67,6 +67,9 @@ const NavBarClient = () => {
             <Link href="/notifications" className="text-gray-600 hover:text-blue-600">
               Bildirishnomalar
             </Link>
+            <Link href="/admin" className="text-orange-600 hover:text-orange-800 font-medium">
+              🔐 Admin
+            </Link>
           </div>
         </div>
       </div>
